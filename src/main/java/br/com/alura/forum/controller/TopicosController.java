@@ -62,8 +62,15 @@ public class TopicosController {
         Topico topico = form.atualizar(id, topicoRepository);
 
         // não precisa chamar o repository para salvar, pois como estamos numa transação, o JPA identifica que houve
-        // alteração na entidade e já persiste.
+        // alteração na entidade e já persiste. Pra isso temos que usar a annotation @Transactional
 
         return ResponseEntity.ok(new TopicoDto(topico));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> remover (@PathVariable Long id) {
+        topicoRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }
