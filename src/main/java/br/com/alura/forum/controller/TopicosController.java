@@ -17,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/topicos")
@@ -50,27 +51,43 @@ public class TopicosController {
     }
 
     @GetMapping("/{id}")
-    public DetalhesDoTopicoDto detalhar(@PathVariable("id") Long id) {
-        Topico topico = topicoRepository.getOne(id);
-        return new DetalhesDoTopicoDto(topico);
+    public ResponseEntity<DetalhesDoTopicoDto> detalhar(@PathVariable("id") Long id) {
+        Optional<Topico> topico = topicoRepository.findById(id);
+
+        if (topico.isPresent()) {
+            return ResponseEntity.ok(new DetalhesDoTopicoDto(topico.get()));
+        }
+
+        return ResponseEntity.notFound().build();
+
     }
 
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<TopicoDto> atualizar(@PathVariable("id") Long id, @RequestBody @Valid AtualizacaoTopicoForm form) {
 
-        Topico topico = form.atualizar(id, topicoRepository);
+        Optional<Topico> optional = topicoRepository.findById(id);
 
-        // não precisa chamar o repository para salvar, pois como estamos numa transação, o JPA identifica que houve
-        // alteração na entidade e já persiste. Pra isso temos que usar a annotation @Transactional
+        if (optional.isPresent()) {
+            Topico topico = form.atualizar(id, topicoRepository);
+            // não precisa chamar o repository para salvar, pois como estamos numa transação, o JPA identifica que houve
+            // alteração na entidade e já persiste. Pra isso temos que usar a annotation @Transactional
+            return ResponseEntity.ok(new TopicoDto(topico));
+        }
 
-        return ResponseEntity.ok(new TopicoDto(topico));
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<?> remover (@PathVariable Long id) {
-        topicoRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        Optional<Topico> optional = topicoRepository.findById(id);
+
+        if (optional.isPresent()) {
+            topicoRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }
