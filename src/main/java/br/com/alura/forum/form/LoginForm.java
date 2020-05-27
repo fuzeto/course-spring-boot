@@ -1,9 +1,11 @@
 package br.com.alura.forum.form;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 public class LoginForm {
 
     private String email;
-    private String password;
+    private String senha;
 
     public String getEmail() {
         return email;
@@ -13,11 +15,15 @@ public class LoginForm {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSenha() {
+        return senha;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
+    public UsernamePasswordAuthenticationToken converter() {
+        return new UsernamePasswordAuthenticationToken(email, senha);
     }
 }
